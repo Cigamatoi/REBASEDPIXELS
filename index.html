@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PixelWar - IOTA Rebased Testnet</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .canvas {
+            display: grid;
+            grid-template-columns: repeat(100, 5px);
+            width: 500px;
+            margin: 20px auto;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .pixel {
+            width: 5px;
+            height: 5px;
+            border: 1px solid #eee;
+            cursor: pointer;
+        }
+        button, input {
+            margin: 10px;
+            padding: 8px 15px;
+        }
+        #walletInfo {
+            margin: 15px auto;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+            max-width: 500px;
+            display: none;
+        }
+        #connectButton {
+            background-color: #0fc1b7;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            padding: 10px 20px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background-color 0.3s;
+        }
+        #connectButton:hover {
+            background-color: #0aa89e;
+        }
+        #placeholder {
+            margin-bottom: 20px;
+        }
+        #controls {
+            display: none;
+        }
+        .transaction-status {
+            padding: 5px 10px;
+            border-radius: 3px;
+            margin-top: 10px;
+            display: none;
+        }
+        .success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+    <!-- Include IOTA Rebased client library from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bignumber.js/9.1.1/bignumber.min.js"></script>
+</head>
+<body>
+    <h1>PixelWar - IOTA Rebased Testnet</h1>
+    <div id="placeholder">
+        <p>Connect to IOTA Rebased Testnet to start placing pixels!</p>
+        <button id="connectButton">Connect to Testnet</button>
+    </div>
+    
+    <div id="walletInfo">
+        <p>Connected Address: <span id="userAddress">...</span></p>
+        <p>Network: <span id="network">IOTA Rebased Testnet</span></p>
+        <p>Balance: <span id="balance">0</span> IOTA</p>
+        <div id="transactionStatus" class="transaction-status"></div>
+    </div>
+    
+    <div id="controls">
+        <input type="color" id="colorPicker" value="#000000">
+        <p id="timer">Time left: 24h 0m 0s</p>
+        <div id="canvas" class="canvas"></div>
+    </div>
+    
+    <script>
+        // IOTA Rebased Testnet configuration
+        const API_ENDPOINT = "https://api.testnet.shimmer.network";
+        const EXPLORER_URL = "https://explorer.shimmer.network/testnet";
+        
+        // Canvas configuration
+        const CANVAS_SIZE = 100;
+        const canvas = document.getElementById('canvas');
+        const colorPicker = document.getElementById('colorPicker');
+        const timerDisplay = document.getElementById('timer');
+        const connectButton = document.getElementById('connectButton');
+        const walletInfo = document.getElementById('walletInfo');
+        const userAddressElement = document.getElementById('userAddress');
+        const balanceElement = document.getElementById('balance');
+        const placeholder = document.getElementById('placeholder');
+        const controls = document.getElementById('controls');
+        const transactionStatus = document.getElementById('transactionStatus');
+        
+        let userWalletAddress = null;
+        let isConnected = false;
+        let pixelData = {};
+        
+        // Load existing pixel data from localStorage or initialize empty
+        try {
+            const savedData = localStorage.getItem('pixelWarData');
+            if (savedData) {
+                pixelData = JSON.parse(savedData);
+                
+                // Apply saved pixel data to canvas
+                Object.entries(pixelData).forEach(([index, color]) => {
+                    const pixel = document.querySelector(`.pixel[data-index="${index}"]`);
+                    if (pixel) {
+                        pixel.style.backgroundColor = color;
+                    }
+                });
+            }
+        } catch (error) {
+            console.error("Error loading saved pixel data:", error);
+        }
+        
+        // Initialize the canvas with white pixels
+        for (let i = 0; i < CANVAS_SIZE * CANVAS_SIZE; i++) {
+            const pixel = document.createElement('div');
+            pixel.className = 'pixel';
+            pixel.dataset.index = i;
+            
+            // Apply saved color or default to white
+            pixel.style.backgroundColor = pixelData[i] || '#FFFFFF';
+            
+            pixel.addEventListener('click', async () => {
+                if (!isConnected) {
+                    alert('Please connect to IOTA Rebased Testnet first');
+                    return;
+                }
+                
+                const x = i % CANVAS_SIZE;
+                const y = Math.floor(i / CANVAS_SIZE);
+                const color = colorPicker.value;
+                
+                try {
+                    await placePixel(i, x, y, color);
+                    pixel.style.backgroundColor = color;
+                    pixelData[i] = color;
+                    
+                    // Save to localStorage
+                    localStorage.setItem('pixelWarData', JSON.stringify(pixelData));
+                    
+                    showTransactionStatus('Pixel placed successfully!', 'success');
+                } catch (error) {
+                    showTransactionStatus('Failed to place pixel: ' + error.message, 'error');
+                    console.error("Error placing pixel:", error);
+                }
+            });
+            
+            canvas.appendChild(pixel);
+        }
+        
+        // Connect to IOTA Rebased Testnet
+        connectButton.addEventListener('click', async () => {
+            try {
+                await connectToTestnet();
+            } catch (error) {
+                console.error("Connection error:", error);
+                showTransactionStatus('Failed to connect: ' + error.message, 'error');
+            }
+        });
+        
+        // Function to connect to IOTA Rebased Testnet
+        async function connectToTestnet() {
+            showTransactionStatus('Connecting to IOTA Rebased Testnet...', 'info');
+            
+            try {
+                // In a real implementation using Create IOTA App, you would use:
+                // const client = new Client({
+                //     nodes: [API_ENDPOINT],
+                //     localPow: true,
+                // });
+                
+                // For this demo, we'll simulate the connection
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Generate a test address
+                userWalletAddress = 'rms1qzp6vz7y8n7a0xf7ruh6gf3m7x7s8c8y8ph4exj59q93gatl8t6pxm5mhzj';
+                
+                // Update UI
+                userAddressElement.textContent = userWalletAddress.slice(0, 8) + '...' + 
+                                               userWalletAddress.slice(-8);
+                balanceElement.textContent = '1000';
+                walletInfo.style.display = 'block';
+                placeholder.style.display = 'none';
+                controls.style.display = 'block';
+                isConnected = true;
+                
+                showTransactionStatus('Connected to IOTA Rebased Testnet!', 'success');
+            } catch (error) {
+                throw new Error('Failed to connect to IOTA Rebased Testnet');
+            }
+        }
+        
+        // Function to place a pixel on the blockchain
+        async function placePixel(index, x, y, color) {
+            if (!isConnected) throw new Error("Not connected to IOTA Rebased Testnet");
+            
+            showTransactionStatus('Sending pixel data to the network...', 'info');
+            
+            try {
+                // In a real implementation, you would:
+                // 1. Create a transaction with the pixel data
+                // 2. Send it to the IOTA network
+                
+                // For demonstration, we'll simulate transaction delay
+                await new Promise(resolve => setTimeout(resolve, 1500));
+                
+                // Simulate transaction
+                const txHash = 'block0x' + Math.random().toString(36).substring(2, 15);
+                console.log(`Pixel placed at (${x}, ${y}) with color ${color}. TX: ${txHash}`);
+                
+                return {
+                    index,
+                    x,
+                    y,
+                    color,
+                    txHash
+                };
+            } catch (error) {
+                throw new Error('Transaction failed');
+            }
+        }
+        
+        // Show transaction status messages
+        function showTransactionStatus(message, type) {
+            transactionStatus.textContent = message;
+            transactionStatus.className = 'transaction-status ' + type;
+            transactionStatus.style.display = 'block';
+            
+            // Hide after 5 seconds for success/error messages
+            if (type === 'success' || type === 'error') {
+                setTimeout(() => {
+                    transactionStatus.style.display = 'none';
+                }, 5000);
+            }
+        }
+        
+        // Simple 24-hour timer
+        let timeLeft = 24 * 60 * 60; // 24 hours in seconds
+        setInterval(() => {
+            if (timeLeft > 0) {
+                timeLeft--;
+                const hours = Math.floor(timeLeft / 3600);
+                const minutes = Math.floor((timeLeft % 3600) / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `Time left: ${hours}h ${minutes}m ${seconds}s`;
+            } else {
+                timerDisplay.textContent = 'Round ended!';
+            }
+        }, 1000);
+    </script>
+</body>
+</html>
