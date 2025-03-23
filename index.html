@@ -30,7 +30,7 @@
       background: rgba(20, 20, 40, 0.9);
       border-radius: 20px;
       width: 90%;
-      max-width: 3000px;
+      max-width: 2200px;
       border: 2px solid #00ffcc;
       box-shadow: 0 0 25px rgba(0, 255, 204, 0.3);
       text-align: center;
@@ -108,17 +108,36 @@
 
     .splash {
       position: absolute;
-      width: 150px;
-      height: 150px;
-      background: radial-gradient(circle, #00ffcc55, transparent 70%);
+      width: 200px;
+      height: 200px;
       border-radius: 50%;
-      filter: blur(40px);
-      animation: move 20s infinite linear;
+      filter: blur(50px);
+      animation: moveAndFade 15s infinite ease-in-out;
     }
 
-    @keyframes move {
-      0% { transform: translateY(0) translateX(0); }
-      100% { transform: translateY(50vh) translateX(100vw); }
+    .splash:nth-child(odd) {
+      background: radial-gradient(circle, #00ffcc66, transparent 70%);
+    }
+
+    .splash:nth-child(even) {
+      background: radial-gradient(circle, #ff00cc66, transparent 70%);
+    }
+
+    @keyframes moveAndFade {
+      0% {
+        transform: translateY(0) translateX(0) scale(1);
+        opacity: 0;
+      }
+      20% {
+        opacity: 0.8;
+      }
+      80% {
+        opacity: 0.8;
+      }
+      100% {
+        transform: translateY(-30vh) translateX(80vw) scale(1.5);
+        opacity: 0;
+      }
     }
 
     footer {
@@ -146,7 +165,7 @@
     </div>
 
     <div class="canvas-wrapper">
-      <canvas id="pixelCanvas" width="2560" height="2560"></canvas>
+      <canvas id="pixelCanvas" width="1808" height="1808"></canvas>
     </div>
   </div>
 
@@ -155,11 +174,69 @@
   </footer>
 
   <div class="background-splashes">
-    <div class="splash" style="top:10%; left:5%; animation-delay: 0s;"></div>
-    <div class="splash" style="top:30%; left:60%; animation-delay: 5s;"></div>
-    <div class="splash" style="top:50%; left:30%; animation-delay: 10s;"></div>
-    <div class="splash" style="top:70%; left:80%; animation-delay: 15s;"></div>
+    <div class="splash" style="top:5%; left:10%; animation-delay: 0s;"></div>
+    <div class="splash" style="top:15%; left:70%; animation-delay: 2s;"></div>
+    <div class="splash" style="top:25%; left:30%; animation-delay: 4s;"></div>
+    <div class="splash" style="top:35%; left:85%; animation-delay: 6s;"></div>
+    <div class="splash" style="top:45%; left:20%; animation-delay: 8s;"></div>
+    <div class="splash" style="top:55%; left:60%; animation-delay: 10s;"></div>
+    <div class="splash" style="top:65%; left:40%; animation-delay: 12s;"></div>
+    <div class="splash" style="top:75%; left:90%; animation-delay: 14s;"></div>
   </div>
 
   <script>
-    let isWallet
+    let isWalletConnected = false;
+    let selectedColor = '#ff0000'; // Default color
+    const pixelSize = 8;
+
+    function connectWallet() {
+      document.getElementById('walletAddress').textContent = '0x1234...5678';
+      document.getElementById('walletBalance').textContent = '100';
+      isWalletConnected = true;
+      document.getElementById('colorPicker').style.display = 'block';
+      alert('Wallet connected successfully!');
+    }
+
+    const colorInput = document.getElementById('colorInput');
+    colorInput.addEventListener('change', (e) => {
+      if (!isWalletConnected) {
+        alert('Please connect your wallet first!');
+        colorInput.value = '#ff0000';
+        return;
+      }
+      selectedColor = e.target.value;
+    });
+
+    const canvas = document.getElementById('pixelCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Initialize grid
+    function drawGrid() {
+      ctx.fillStyle = '#111';
+      for (let x = 0; x < 1808; x += pixelSize) {
+        for (let y = 0; y < 1808; y += pixelSize) {
+          ctx.fillRect(x, y, pixelSize - 1, pixelSize - 1);
+        }
+      }
+    }
+
+    // Handle pixel painting
+    canvas.addEventListener('click', (e) => {
+      if (!isWalletConnected) {
+        alert('Please connect your wallet first!');
+        return;
+      }
+      
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor((e.clientX - rect.left) / pixelSize) * pixelSize;
+      const y = Math.floor((e.clientY - rect.top) / pixelSize) * pixelSize;
+      
+      ctx.fillStyle = selectedColor;
+      ctx.fillRect(x, y, pixelSize - 1, pixelSize - 1);
+    });
+
+    // Initial draw
+    drawGrid();
+  </script>
+</body>
+</html>
