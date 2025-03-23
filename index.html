@@ -6,7 +6,6 @@
   <title>REBASED PIXELS</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
-    /* Existing styles unchanged for brevity */
     body { margin: 0; padding: 0; background-color: #0f0f1a; color: #e0e0e0; font-family: 'Orbitron', sans-serif; overflow-x: hidden; position: relative; }
     header { text-align: center; padding: 2rem; font-size: 3rem; color: #00ffcc; text-shadow: 0 0 20px #00ffcc; }
     .main-card { margin: 2rem auto; padding: 2rem; background: rgba(20, 20, 40, 0.9); border-radius: 20px; width: 90%; max-width: 2200px; border: 2px solid #00ffcc; box-shadow: 0 0 25px rgba(0, 255, 204, 0.3); text-align: center; overflow: auto; }
@@ -54,14 +53,14 @@
     <div class="splash" style="top:75%; left:90%; animation-delay: 14s;"></div>
   </div>
 
-  <!-- Use UMD build for browser compatibility -->
-  <script src="https://unpkg.com/@iota/sdk@latest/dist/iota-sdk.umd.js"></script>
+  <!-- Use specific version of IOTA SDK UMD build -->
+  <script src="https://unpkg.com/@iota/sdk@1.8.6/dist/iota-sdk.umd.js"></script>
   <script>
     let isWalletConnected = false;
     let selectedColor = '#ff0000';
     const pixelSize = 8;
     let client, wallet, account;
-    const CONTRACT_ADDRESS = '0x1'; // Replace with deployed contract address
+    const CONTRACT_ADDRESS = '0x1'; // Replace with your deployed Move contract address
 
     const canvas = document.getElementById('pixelCanvas');
     const ctx = canvas.getContext('2d');
@@ -87,16 +86,14 @@
     // Connect to IOTA Rebased Testnet
     async function connectWallet() {
       try {
-        // Check if SDK loaded correctly
         if (!window.iota) {
-          throw new Error('IOTA SDK not loaded on window.iota');
+          throw new Error('IOTA SDK not loaded. Check script source.');
         }
 
-        // Destructure from window.iota (adjust based on actual namespace)
         const { Client, Wallet } = window.iota;
 
         client = new Client({
-          nodes: ['https://rpc.testnet.iota-rebased.org'], // From blog post
+          nodes: ['https://rpc.testnet.iota-rebased.org'], // Testnet node from blog
         });
 
         wallet = new Wallet({
@@ -104,86 +101,8 @@
           clientOptions: { nodes: ['https://rpc.testnet.iota-rebased.org'] },
         });
 
-        const mnemonic = 'your-testnet-mnemonic-here'; // Replace with Testnet mnemonic
+        // Replace with your Testnet mnemonic from faucet
+        const mnemonic = 'your-testnet-mnemonic-here';
         await wallet.storeMnemonic(mnemonic);
         const accounts = await wallet.getAccounts();
-        account = accounts[0];
-
-        document.getElementById('walletAddress').textContent = account.address.slice(0, 6) + '...' + account.address.slice(-4);
-        const balance = await account.sync();
-        document.getElementById('walletBalance').textContent = (balance.baseCoin.total / 1e6).toFixed(2);
-        isWalletConnected = true;
-        document.getElementById('colorPicker').style.display = 'block';
-        alert('Connected to IOTA Rebased Testnet!');
-        await syncCanvas();
-      } catch (error) {
-        console.error('Wallet connection failed:', error);
-        alert('Failed to connect: ' + error.message);
-      }
-    }
-
-    // Color selection
-    const colorInput = document.getElementById('colorInput');
-    colorInput.addEventListener('change', (e) => {
-      if (!isWalletConnected) {
-        alert('Please connect your wallet first!');
-        colorInput.value = '#ff0000';
-        return;
-      }
-      selectedColor = e.target.value;
-    });
-
-    // Submit pixel change to smart contract
-    async function submitPixelChange(x, y, color) {
-      if (!isWalletConnected || !account) {
-        alert('Please connect your wallet first!');
-        return;
-      }
-
-      try {
-        const rgbColor = hexToRgb(color);
-        const pixelData = {
-          function: 'set_pixel',
-          args: {
-            x: x / pixelSize,
-            y: y / pixelSize,
-            color: rgbColor
-          }
-        };
-
-        const message = await account.prepareTransaction({
-          recipient: CONTRACT_ADDRESS,
-          amount: '1000000', // 1 MIOTA for gas
-          data: Buffer.from(JSON.stringify(pixelData)).toString('hex'),
-        }).then(tx => account.sendTransaction(tx));
-
-        const confirmed = await client.waitForInclusion(message.messageId);
-        if (confirmed) {
-          ctx.fillStyle = color;
-          ctx.fillRect(x, y, pixelSize - 1, pixelSize - 1);
-          console.log(`Pixel at (${x / pixelSize}, ${y / pixelSize}) confirmed. Message ID: ${message.messageId}`);
-        }
-      } catch (error) {
-        console.error('Transaction failed:', error);
-        alert('Failed to update pixel: ' + error.message);
-      }
-    }
-
-    // Sync canvas with on-chain state (simplified)
-    async function syncCanvas() {
-      drawGrid(); // Placeholder; fetch from contract in production
-    }
-
-    // Handle pixel painting
-    canvas.addEventListener('click', (e) => {
-      const rect = canvas.getBoundingClientRect();
-      const x = Math.floor((e.clientX - rect.left) / pixelSize) * pixelSize;
-      const y = Math.floor((e.clientY - rect.top) / pixelSize) * pixelSize;
-      submitPixelChange(x, y, selectedColor);
-    });
-
-    // Initial draw
-    drawGrid();
-  </script>
-</body>
-</html>
+        account
