@@ -30,7 +30,7 @@
       background: rgba(20, 20, 40, 0.9);
       border-radius: 20px;
       width: 90%;
-      max-width: 800px;
+      max-width: 1000px;
       border: 2px solid #00ffcc;
       box-shadow: 0 0 25px rgba(0, 255, 204, 0.3);
       text-align: center;
@@ -48,7 +48,7 @@
       background: linear-gradient(90deg, #00ffcc, #00bbaa);
       border: none;
       padding: 0.75rem 1.5rem;
-      margin-top: 1rem;
+      margin: 0.5rem;
       border-radius: 10px;
       color: #000;
       font-size: 1rem;
@@ -60,6 +60,26 @@
     .wallet-card button:hover {
       transform: scale(1.05);
       box-shadow: 0 0 20px #00ffcc;
+    }
+
+    .color-picker {
+      margin: 1rem 0;
+      display: none; /* Hidden until wallet is connected */
+    }
+
+    .color-option {
+      width: 30px;
+      height: 30px;
+      display: inline-block;
+      margin: 0 5px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid #ffffff00;
+      transition: border 0.2s;
+    }
+
+    .color-option.selected {
+      border: 2px solid #00ffcc;
     }
 
     .canvas-wrapper {
@@ -120,10 +140,18 @@
       <div>Wallet: <span id="walletAddress">Not Connected</span></div>
       <div>Balance: <span id="walletBalance">0</span></div>
       <button onclick="connectWallet()">Connect Wallet</button>
+      <div class="color-picker" id="colorPicker">
+        <div class="color-option" style="background-color: #ff0000" onclick="selectColor('#ff0000')"></div>
+        <div class="color-option" style="background-color: #00ff00" onclick="selectColor('#00ff00')"></div>
+        <div class="color-option" style="background-color: #0000ff" onclick="selectColor('#0000ff')"></div>
+        <div class="color-option" style="background-color: #ffff00" onclick="selectColor('#ffff00')"></div>
+        <div class="color-option" style="background-color: #ff00ff" onclick="selectColor('#ff00ff')"></div>
+        <div class="color-option" style="background-color: #00ffff" onclick="selectColor('#00ffff')"></div>
+      </div>
     </div>
 
     <div class="canvas-wrapper">
-      <canvas id="pixelCanvas" width="400" height="400"></canvas>
+      <canvas id="pixelCanvas" width="800" height="800"></canvas>
     </div>
   </div>
 
@@ -139,18 +167,63 @@
   </div>
 
   <script>
+    let isWalletConnected = false;
+    let selectedColor = '#ff0000'; // Default color
+    const pixelSize = 20;
+
     function connectWallet() {
-      alert('Wallet connection will be integrated.');
+      // Simulate wallet connection
+      document.getElementById('walletAddress').textContent = '0x1234...5678';
+      document.getElementById('walletBalance').textContent = '100';
+      isWalletConnected = true;
+      document.getElementById('colorPicker').style.display = 'block';
+      alert('Wallet connected successfully!');
+    }
+
+    function selectColor(color) {
+      if (!isWalletConnected) {
+        alert('Please connect your wallet first!');
+        return;
+      }
+      selectedColor = color;
+      document.querySelectorAll('.color-option').forEach(option => {
+        option.classList.remove('selected');
+        if (option.style.backgroundColor === color) {
+          option.classList.add('selected');
+        }
+      });
     }
 
     const canvas = document.getElementById('pixelCanvas');
     const ctx = canvas.getContext('2d');
-    for (let x = 0; x < 400; x += 20) {
-      for (let y = 0; y < 400; y += 20) {
-        ctx.fillStyle = '#111';
-        ctx.fillRect(x, y, 18, 18);
+
+    // Initialize grid
+    function drawGrid() {
+      ctx.fillStyle = '#111';
+      for (let x = 0; x < 800; x += pixelSize) {
+        for (let y = 0; y < 800; y += pixelSize) {
+          ctx.fillRect(x, y, pixelSize - 2, pixelSize - 2);
+        }
       }
     }
+
+    // Handle pixel painting
+    canvas.addEventListener('click', (e) => {
+      if (!isWalletConnected) {
+        alert('Please connect your wallet first!');
+        return;
+      }
+      
+      const rect = canvas.getBoundingClientRect();
+      const x = Math.floor((e.clientX - rect.left) / pixelSize) * pixelSize;
+      const y = Math.floor((e.clientY - rect.top) / pixelSize) * pixelSize;
+      
+      ctx.fillStyle = selectedColor;
+      ctx.fillRect(x, y, pixelSize - 2, pixelSize - 2);
+    });
+
+    // Initial draw
+    drawGrid();
   </script>
 </body>
 </html>
