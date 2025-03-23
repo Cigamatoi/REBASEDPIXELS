@@ -54,7 +54,8 @@
     <div class="splash" style="top:75%; left:90%; animation-delay: 14s;"></div>
   </div>
 
-  <script src="https://unpkg.com/@iota/sdk@latest/dist/iota-sdk.js"></script>
+  <!-- Use UMD build for browser compatibility -->
+  <script src="https://unpkg.com/@iota/sdk@latest/dist/iota-sdk.umd.js"></script>
   <script>
     let isWalletConnected = false;
     let selectedColor = '#ff0000';
@@ -86,7 +87,14 @@
     // Connect to IOTA Rebased Testnet
     async function connectWallet() {
       try {
-        const { Client, Wallet } = window.IotaSDK;
+        // Check if SDK loaded correctly
+        if (!window.iota) {
+          throw new Error('IOTA SDK not loaded on window.iota');
+        }
+
+        // Destructure from window.iota (adjust based on actual namespace)
+        const { Client, Wallet } = window.iota;
+
         client = new Client({
           nodes: ['https://rpc.testnet.iota-rebased.org'], // From blog post
         });
@@ -107,7 +115,7 @@
         isWalletConnected = true;
         document.getElementById('colorPicker').style.display = 'block';
         alert('Connected to IOTA Rebased Testnet!');
-        await syncCanvas(); // Sync initial state
+        await syncCanvas();
       } catch (error) {
         console.error('Wallet connection failed:', error);
         alert('Failed to connect: ' + error.message);
@@ -145,7 +153,7 @@
 
         const message = await account.prepareTransaction({
           recipient: CONTRACT_ADDRESS,
-          amount: '1000000', // 1 MIOTA for gas (adjust as needed)
+          amount: '1000000', // 1 MIOTA for gas
           data: Buffer.from(JSON.stringify(pixelData)).toString('hex'),
         }).then(tx => account.sendTransaction(tx));
 
@@ -163,9 +171,7 @@
 
     // Sync canvas with on-chain state (simplified)
     async function syncCanvas() {
-      // In production, fetch all pixel states from the contract
-      // For demo, just draw the initial grid
-      drawGrid();
+      drawGrid(); // Placeholder; fetch from contract in production
     }
 
     // Handle pixel painting
