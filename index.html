@@ -30,10 +30,11 @@
       background: rgba(20, 20, 40, 0.9);
       border-radius: 20px;
       width: 90%;
-      max-width: 1000px;
+      max-width: 3000px;
       border: 2px solid #00ffcc;
       box-shadow: 0 0 25px rgba(0, 255, 204, 0.3);
       text-align: center;
+      overflow: auto;
     }
 
     .wallet-card {
@@ -67,19 +68,17 @@
       display: none; /* Hidden until wallet is connected */
     }
 
-    .color-option {
-      width: 30px;
-      height: 30px;
-      display: inline-block;
-      margin: 0 5px;
-      border-radius: 50%;
+    .color-picker input[type="color"] {
+      width: 60px;
+      height: 40px;
+      border: none;
+      background: none;
       cursor: pointer;
-      border: 2px solid #ffffff00;
-      transition: border 0.2s;
+      padding: 0;
     }
 
-    .color-option.selected {
-      border: 2px solid #00ffcc;
+    .color-picker label {
+      margin-right: 10px;
     }
 
     .canvas-wrapper {
@@ -141,17 +140,13 @@
       <div>Balance: <span id="walletBalance">0</span></div>
       <button onclick="connectWallet()">Connect Wallet</button>
       <div class="color-picker" id="colorPicker">
-        <div class="color-option" style="background-color: #ff0000" onclick="selectColor('#ff0000')"></div>
-        <div class="color-option" style="background-color: #00ff00" onclick="selectColor('#00ff00')"></div>
-        <div class="color-option" style="background-color: #0000ff" onclick="selectColor('#0000ff')"></div>
-        <div class="color-option" style="background-color: #ffff00" onclick="selectColor('#ffff00')"></div>
-        <div class="color-option" style="background-color: #ff00ff" onclick="selectColor('#ff00ff')"></div>
-        <div class="color-option" style="background-color: #00ffff" onclick="selectColor('#00ffff')"></div>
+        <label for="colorInput">Pick a color:</label>
+        <input type="color" id="colorInput" value="#ff0000">
       </div>
     </div>
 
     <div class="canvas-wrapper">
-      <canvas id="pixelCanvas" width="800" height="800"></canvas>
+      <canvas id="pixelCanvas" width="2560" height="2560"></canvas>
     </div>
   </div>
 
@@ -167,63 +162,4 @@
   </div>
 
   <script>
-    let isWalletConnected = false;
-    let selectedColor = '#ff0000'; // Default color
-    const pixelSize = 20;
-
-    function connectWallet() {
-      // Simulate wallet connection
-      document.getElementById('walletAddress').textContent = '0x1234...5678';
-      document.getElementById('walletBalance').textContent = '100';
-      isWalletConnected = true;
-      document.getElementById('colorPicker').style.display = 'block';
-      alert('Wallet connected successfully!');
-    }
-
-    function selectColor(color) {
-      if (!isWalletConnected) {
-        alert('Please connect your wallet first!');
-        return;
-      }
-      selectedColor = color;
-      document.querySelectorAll('.color-option').forEach(option => {
-        option.classList.remove('selected');
-        if (option.style.backgroundColor === color) {
-          option.classList.add('selected');
-        }
-      });
-    }
-
-    const canvas = document.getElementById('pixelCanvas');
-    const ctx = canvas.getContext('2d');
-
-    // Initialize grid
-    function drawGrid() {
-      ctx.fillStyle = '#111';
-      for (let x = 0; x < 800; x += pixelSize) {
-        for (let y = 0; y < 800; y += pixelSize) {
-          ctx.fillRect(x, y, pixelSize - 2, pixelSize - 2);
-        }
-      }
-    }
-
-    // Handle pixel painting
-    canvas.addEventListener('click', (e) => {
-      if (!isWalletConnected) {
-        alert('Please connect your wallet first!');
-        return;
-      }
-      
-      const rect = canvas.getBoundingClientRect();
-      const x = Math.floor((e.clientX - rect.left) / pixelSize) * pixelSize;
-      const y = Math.floor((e.clientY - rect.top) / pixelSize) * pixelSize;
-      
-      ctx.fillStyle = selectedColor;
-      ctx.fillRect(x, y, pixelSize - 2, pixelSize - 2);
-    });
-
-    // Initial draw
-    drawGrid();
-  </script>
-</body>
-</html>
+    let isWallet
