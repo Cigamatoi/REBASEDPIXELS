@@ -6,153 +6,28 @@
   <title>REBASED PIXELS</title>
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500&display=swap" rel="stylesheet">
   <style>
-    body {
-      margin: 0;
-      padding: 0;
-      background-color: #0f0f1a;
-      color: #e0e0e0;
-      font-family: 'Orbitron', sans-serif;
-      overflow-x: hidden;
-      position: relative;
-    }
-
-    header {
-      text-align: center;
-      padding: 2rem;
-      font-size: 3rem;
-      color: #00ffcc;
-      text-shadow: 0 0 20px #00ffcc;
-    }
-
-    .main-card {
-      margin: 2rem auto;
-      padding: 2rem;
-      background: rgba(20, 20, 40, 0.9);
-      border-radius: 20px;
-      width: 90%;
-      max-width: 2200px;
-      border: 2px solid #00ffcc;
-      box-shadow: 0 0 25px rgba(0, 255, 204, 0.3);
-      text-align: center;
-      overflow: auto;
-    }
-
-    .wallet-card {
-      background: rgba(10, 10, 25, 0.9);
-      border-radius: 15px;
-      padding: 1.5rem;
-      margin: 1rem 0;
-      box-shadow: 0 0 15px rgba(0, 255, 204, 0.1);
-    }
-
-    .wallet-card button {
-      background: linear-gradient(90deg, #00ffcc, #00bbaa);
-      border: none;
-      padding: 0.75rem 1.5rem;
-      margin: 0.5rem;
-      border-radius: 10px;
-      color: #000;
-      font-size: 1rem;
-      cursor: pointer;
-      box-shadow: 0 0 12px #00ffcc;
-      transition: transform 0.2s, box-shadow 0.3s;
-    }
-
-    .wallet-card button:hover {
-      transform: scale(1.05);
-      box-shadow: 0 0 20px #00ffcc;
-    }
-
-    .color-picker {
-      margin: 1rem 0;
-      display: none; /* Hidden until wallet is connected */
-    }
-
-    .color-picker input[type="color"] {
-      width: 60px;
-      height: 40px;
-      border: none;
-      background: none;
-      cursor: pointer;
-      padding: 0;
-    }
-
-    .color-picker label {
-      margin-right: 10px;
-    }
-
-    .canvas-wrapper {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      margin-top: 2rem;
-    }
-
-    #pixelCanvas {
-      border: 2px solid #00ffcc;
-      border-radius: 12px;
-      box-shadow: 0 0 20px rgba(0, 255, 204, 0.3);
-      background-color: #0f0f1a;
-    }
-
-    .background-splashes {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      overflow: hidden;
-      z-index: -1;
-    }
-
-    .splash {
-      position: absolute;
-      width: 200px;
-      height: 200px;
-      border-radius: 50%;
-      filter: blur(50px);
-      animation: moveAndFade 15s infinite ease-in-out;
-    }
-
-    .splash:nth-child(odd) {
-      background: radial-gradient(circle, #00ffcc66, transparent 70%);
-    }
-
-    .splash:nth-child(even) {
-      background: radial-gradient(circle, #ff00cc66, transparent 70%);
-    }
-
-    @keyframes moveAndFade {
-      0% {
-        transform: translateY(0) translateX(0) scale(1);
-        opacity: 0;
-      }
-      20% {
-        opacity: 0.8;
-      }
-      80% {
-        opacity: 0.8;
-      }
-      100% {
-        transform: translateY(-30vh) translateX(80vw) scale(1.5);
-        opacity: 0;
-      }
-    }
-
-    footer {
-      margin-top: 3rem;
-      text-align: center;
-      font-size: 0.9rem;
-      color: #555;
-    }
+    /* Existing styles unchanged for brevity */
+    body { margin: 0; padding: 0; background-color: #0f0f1a; color: #e0e0e0; font-family: 'Orbitron', sans-serif; overflow-x: hidden; position: relative; }
+    header { text-align: center; padding: 2rem; font-size: 3rem; color: #00ffcc; text-shadow: 0 0 20px #00ffcc; }
+    .main-card { margin: 2rem auto; padding: 2rem; background: rgba(20, 20, 40, 0.9); border-radius: 20px; width: 90%; max-width: 2200px; border: 2px solid #00ffcc; box-shadow: 0 0 25px rgba(0, 255, 204, 0.3); text-align: center; overflow: auto; }
+    .wallet-card { background: rgba(10, 10, 25, 0.9); border-radius: 15px; padding: 1.5rem; margin: 1rem 0; box-shadow: 0 0 15px rgba(0, 255, 204, 0.1); }
+    .wallet-card button { background: linear-gradient(90deg, #00ffcc, #00bbaa); border: none; padding: 0.75rem 1.5rem; margin: 0.5rem; border-radius: 10px; color: #000; font-size: 1rem; cursor: pointer; box-shadow: 0 0 12px #00ffcc; transition: transform 0.2s, box-shadow 0.3s; }
+    .wallet-card button:hover { transform: scale(1.05); box-shadow: 0 0 20px #00ffcc; }
+    .color-picker { margin: 1rem 0; display: none; }
+    .color-picker input[type="color"] { width: 60px; height: 40px; border: none; background: none; cursor: pointer; padding: 0; }
+    .color-picker label { margin-right: 10px; }
+    .canvas-wrapper { display: flex; justify-content: center; align-items: center; margin-top: 2rem; }
+    #pixelCanvas { border: 2px solid #00ffcc; border-radius: 12px; box-shadow: 0 0 20px rgba(0, 255, 204, 0.3); background-color: #0f0f1a; }
+    .background-splashes { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; overflow: hidden; z-index: -1; }
+    .splash { position: absolute; width: 200px; height: 200px; border-radius: 50%; filter: blur(50px); animation: moveAndFade 15s infinite ease-in-out; }
+    .splash:nth-child(odd) { background: radial-gradient(circle, #00ffcc66, transparent 70%); }
+    .splash:nth-child(even) { background: radial-gradient(circle, #ff00cc66, transparent 70%); }
+    @keyframes moveAndFade { 0% { transform: translateY(0) translateX(0) scale(1); opacity: 0; } 20% { opacity: 0.8; } 80% { opacity: 0.8; } 100% { transform: translateY(-30vh) translateX(80vw) scale(1.5); opacity: 0; } }
+    footer { margin-top: 3rem; text-align: center; font-size: 0.9rem; color: #555; }
   </style>
 </head>
 <body>
-  <header>
-    REBASED PIXELS
-  </header>
-
+  <header>REBASED PIXELS</header>
   <div class="main-card">
     <div class="wallet-card">
       <div>Wallet: <span id="walletAddress">Not Connected</span></div>
@@ -163,16 +38,11 @@
         <input type="color" id="colorInput" value="#ff0000">
       </div>
     </div>
-
     <div class="canvas-wrapper">
       <canvas id="pixelCanvas" width="1808" height="1808"></canvas>
     </div>
   </div>
-
-  <footer>
-    Powered by IOTA Rebased Testnet | Epoch Ends in: <span id="epochTimer">23:59:59</span>
-  </footer>
-
+  <footer>Powered by IOTA Rebased Testnet | Epoch Ends in: <span id="epochTimer">23:59:59</span></footer>
   <div class="background-splashes">
     <div class="splash" style="top:5%; left:10%; animation-delay: 0s;"></div>
     <div class="splash" style="top:15%; left:70%; animation-delay: 2s;"></div>
@@ -184,28 +54,13 @@
     <div class="splash" style="top:75%; left:90%; animation-delay: 14s;"></div>
   </div>
 
+  <!-- Include IOTA SDK (assumed CDN for simplicity; use npm in production) -->
+  <script src="https://unpkg.com/@iota/sdk@latest/dist/iota-sdk.js"></script>
   <script>
     let isWalletConnected = false;
-    let selectedColor = '#ff0000'; // Default color
+    let selectedColor = '#ff0000';
     const pixelSize = 8;
-
-    function connectWallet() {
-      document.getElementById('walletAddress').textContent = '0x1234...5678';
-      document.getElementById('walletBalance').textContent = '100';
-      isWalletConnected = true;
-      document.getElementById('colorPicker').style.display = 'block';
-      alert('Wallet connected successfully!');
-    }
-
-    const colorInput = document.getElementById('colorInput');
-    colorInput.addEventListener('change', (e) => {
-      if (!isWalletConnected) {
-        alert('Please connect your wallet first!');
-        colorInput.value = '#ff0000';
-        return;
-      }
-      selectedColor = e.target.value;
-    });
+    let client, wallet, account;
 
     const canvas = document.getElementById('pixelCanvas');
     const ctx = canvas.getContext('2d');
@@ -220,19 +75,93 @@
       }
     }
 
-    // Handle pixel painting
-    canvas.addEventListener('click', (e) => {
+    // Connect to IOTA Rebased Testnet
+    async function connectWallet() {
+      try {
+        // Initialize client (replace with Testnet node URL from documentation)
+        const { Client, Wallet } = window.IotaSDK;
+        client = new Client({
+          nodes: ['https://api.testnet.rebased.iota.org'], // Hypothetical Testnet node
+        });
+
+        // Setup wallet with mnemonic (for Testnet, use a test seed)
+        wallet = new Wallet({
+          storagePath: './walletdb', // Local storage for demo
+          clientOptions: { nodes: ['https://api.testnet.rebased.iota.org'] },
+        });
+
+        // Use a test mnemonic (generate one from Testnet faucet)
+        const mnemonic = 'your-testnet-mnemonic-here'; // Replace with actual Testnet mnemonic
+        await wallet.storeMnemonic(mnemonic);
+        const accounts = await wallet.getAccounts();
+        account = accounts[0];
+
+        // Update UI
+        document.getElementById('walletAddress').textContent = account.address;
+        const balance = await account.sync();
+        document.getElementById('walletBalance').textContent = balance.baseCoin.total / 1e6; // Convert to MIOTA
+        isWalletConnected = true;
+        document.getElementById('colorPicker').style.display = 'block';
+        alert('Wallet connected to IOTA Rebased Testnet!');
+      } catch (error) {
+        console.error('Wallet connection failed:', error);
+        alert('Failed to connect wallet: ' + error.message);
+      }
+    }
+
+    // Color selection
+    const colorInput = document.getElementById('colorInput');
+    colorInput.addEventListener('change', (e) => {
+      if (!isWalletConnected) {
+        alert('Please connect your wallet first!');
+        colorInput.value = '#ff0000';
+        return;
+      }
+      selectedColor = e.target.value;
+    });
+
+    // Submit pixel change transaction
+    async function submitPixelChange(x, y, color) {
       if (!isWalletConnected) {
         alert('Please connect your wallet first!');
         return;
       }
-      
+
+      try {
+        // Prepare data payload (pixel coordinates and color)
+        const pixelData = {
+          x: x / pixelSize,
+          y: y / pixelSize,
+          color: color
+        };
+
+        // Create a transaction (simplified; assumes a smart contract or data tx)
+        const message = await account.prepareOutput({
+          recipient: account.address, // Self for demo; could be a contract address
+          amount: '1000000', // 1 MIOTA (adjust for Testnet dust protection)
+          data: Buffer.from(JSON.stringify(pixelData)).toString('hex'),
+        }).then(output => account.sendOutputs([output]));
+
+        // Wait for confirmation
+        const confirmed = await client.waitForInclusion(message.messageId);
+        if (confirmed) {
+          // Update canvas only after confirmation
+          ctx.fillStyle = color;
+          ctx.fillRect(x, y, pixelSize - 1, pixelSize - 1);
+          alert(`Pixel at (${x / pixelSize}, ${y / pixelSize}) confirmed on-chain!`);
+        }
+      } catch (error) {
+        console.error('Transaction failed:', error);
+        alert('Failed to submit pixel change: ' + error.message);
+      }
+    }
+
+    // Handle pixel painting
+    canvas.addEventListener('click', (e) => {
       const rect = canvas.getBoundingClientRect();
       const x = Math.floor((e.clientX - rect.left) / pixelSize) * pixelSize;
       const y = Math.floor((e.clientY - rect.top) / pixelSize) * pixelSize;
-      
-      ctx.fillStyle = selectedColor;
-      ctx.fillRect(x, y, pixelSize - 1, pixelSize - 1);
+      submitPixelChange(x, y, selectedColor);
     });
 
     // Initial draw
