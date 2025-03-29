@@ -21,118 +21,6 @@ interface PixelData {
   color: string;
 }
 
-// Funktion zum Laden eines Bildes und Umwandeln in Pixel-Daten
-function useCanvasLogo() {
-  const [logoPixels, setLogoPixels] = useState<PixelData[]>([]);
-  
-  // Lade das Logo beim ersten Laden der Komponente
-  useEffect(() => {
-    const loadLogo = async () => {
-      try {
-        // Canvas Dimensionen definieren (gesamte Größe)
-        const CANVAS_WIDTH = 100;
-        const CANVAS_HEIGHT = 100;
-        
-        // Die exakte Mitte des Canvas finden
-        const CENTER_X = Math.floor(CANVAS_WIDTH / 2);  // 50 (0-basiert, also bei einem 100px Canvas)
-        const CENTER_Y = Math.floor(CANVAS_HEIGHT / 2); // 50
-        
-        console.log(`Canvas center: (${CENTER_X}, ${CENTER_Y})`);
-        
-        // Bild laden
-        const img = new Image();
-        img.crossOrigin = "Anonymous";
-        img.src = "/images/Canvaslogo.png";
-        
-        img.onload = () => {
-          console.log(`Bild geladen: ${img.width}x${img.height}`);
-          
-          // Hilfs-Canvas erstellen
-          const canvas = document.createElement('canvas');
-          const ctx = canvas.getContext('2d');
-          if (!ctx) {
-            console.error("Canvas context not available");
-            return;
-          }
-          
-          // Canvas auf die volle Größe des Spielfeldes setzen
-          canvas.width = CANVAS_WIDTH;
-          canvas.height = CANVAS_HEIGHT;
-          
-          // Die Größe berechnen, die das Bild haben sollte, um den Canvas komplett zu füllen
-          // und dabei das Seitenverhältnis zu bewahren
-          const scale = Math.max(
-            CANVAS_WIDTH / img.width,
-            CANVAS_HEIGHT / img.height
-          ) * 1.5; // 1.5x größer machen, um sicherzustellen, dass es den Canvas komplett füllt
-          
-          const scaledWidth = Math.ceil(img.width * scale);
-          const scaledHeight = Math.ceil(img.height * scale);
-          
-          // Das Bild so positionieren, dass es mittig ist
-          const offsetX = Math.floor((CANVAS_WIDTH - scaledWidth) / 2);
-          const offsetY = Math.floor((CANVAS_HEIGHT - scaledHeight) / 2);
-          
-          console.log(`Skaliertes Bild: ${scaledWidth}x${scaledHeight}, Position: (${offsetX}, ${offsetY})`);
-          
-          // Canvas zuerst löschen
-          ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-          
-          // Das Bild in der berechneten Größe und Position zeichnen
-          ctx.drawImage(
-            img, 
-            0, 0, img.width, img.height,           // Quelle: ganzes Bild
-            offsetX, offsetY, scaledWidth, scaledHeight  // Ziel: skaliert und zentriert
-          );
-          
-          // Die Pixel extrahieren
-          const imageData = ctx.getImageData(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
-          const resultPixels: PixelData[] = [];
-          
-          // Ein einfacher Test: Markieren der Mitte mit einem weißen Pixel
-          // (nur für Debugging, kann später entfernt werden)
-          const debugPixel: PixelData = {
-            x: CENTER_X,
-            y: CENTER_Y,
-            color: '#ffffff' // weiß, um die Mitte zu markieren
-          };
-          resultPixels.push(debugPixel);
-          
-          // Durch alle Pixel des Canvas iterieren
-          for (let y = 0; y < CANVAS_HEIGHT; y++) {
-            for (let x = 0; x < CANVAS_WIDTH; x++) {
-              const index = (y * CANVAS_WIDTH + x) * 4;
-              
-              // Nur nicht-transparente Pixel berücksichtigen (Alpha > 0)
-              // und das weiße Debug-Pixel nicht überschreiben
-              if (imageData.data[index + 3] > 128 && !(x === CENTER_X && y === CENTER_Y)) {
-                resultPixels.push({
-                  x: x,
-                  y: y,
-                  color: '#00ffcc'
-                });
-              }
-            }
-          }
-          
-          console.log(`Logo geladen: ${resultPixels.length} Pixel extrahiert`);
-          setLogoPixels(resultPixels);
-        };
-        
-        img.onerror = (err) => {
-          console.error("Fehler beim Laden des Logos:", err);
-        };
-      } catch (error) {
-        console.error("Fehler beim Verarbeiten des Logos:", error);
-      }
-    };
-    
-    loadLogo();
-  }, []);
-  
-  return logoPixels;
-}
-
 export default function Game() {
   const router = useRouter()
   const wallets = useWallets()
@@ -153,9 +41,6 @@ export default function Game() {
   const [winnerAddress, setWinnerAddress] = useState<string | null>(null)
   const [timeRemaining, setTimeRemaining] = useState('00:00') // Neuer State für die Anzeige
   const [debugMinting, setDebugMinting] = useState<string[]>([]) // Debug-Informationen für das Minting
-
-  // Logo-Pixel laden - Rest bleibt unverändert
-  const logoPixels = useCanvasLogo();
   
   // Nach dem vorhandenen State
   const [canvasClearedCount, setCanvasClearedCount] = useState(0);
@@ -175,74 +60,6 @@ export default function Game() {
     console.log('Canvas zurückgesetzt nach Epochenende');
     setDebugMinting(prev => [...prev, 'Canvas wurde zurückgesetzt']);
   }, [sendPixelUpdate]);
-  
-  // Button zum manuellen Zurücksetzen des Canvas
-  const handleResetCanvas = () => {
-    if (connectionStatus !== 'connected') {
-      alert('Bitte verbinde zuerst deine Wallet');
-      return;
-    }
-    
-    if (window.confirm('Möchtest du wirklich das Canvas zurücksetzen?')) {
-      resetCanvas();
-    }
-  };
-  
-  // Button zum Laden des Logos auf das Canvas
-  const handleLoadLogo = () => {
-    if (connectionStatus !== 'connected' || isTransactionInProgress) {
-      alert('Wallet nicht verbunden oder Transaktion läuft bereits');
-      return;
-    }
-    
-    if (!logoPixels.length) {
-      alert('Logo noch nicht geladen. Bitte warte einen Moment.');
-      return;
-    }
-    
-    if (window.confirm(`${logoPixels.length} Logo-Pixel auf das Canvas laden? Alle Pixel werden in der Farbe #00ffcc dargestellt.`)) {
-      // Setze Ladeflag
-      setIsTransactionInProgress(true);
-      
-      // Canvas vorher zurücksetzen?
-      if (pixels && pixels.length > 0 && window.confirm('Möchtest du das Canvas vorher zurücksetzen?')) {
-        resetCanvas();
-      }
-      
-      // Zeige Fortschritt an
-      setDebugMinting(prev => [...prev, `Starte Logo-Ladeprozess: ${logoPixels.length} Pixel`]);
-      
-      try {
-        // Sende alle Pixel auf einmal als Batch, um die Performance zu verbessern
-        // Dadurch wird die Anzahl der Socket-Events drastisch reduziert
-        sendPixelUpdate(logoPixels);
-        
-        console.log(`${logoPixels.length} Logo-Pixel als Batch gesendet`);
-        setDebugMinting(prev => [...prev, `Logo mit ${logoPixels.length} Pixeln vollständig geladen`]);
-      } catch (error) {
-        console.error("Fehler beim Laden des Logos:", error);
-        setDebugMinting(prev => [...prev, `Fehler beim Laden des Logos: ${error}`]);
-        
-        // Fallback: Sende Pixel einzeln, falls der Batch-Modus fehlschlägt
-        let count = 0;
-        const totalPixels = logoPixels.length;
-        
-        for (const pixel of logoPixels) {
-          sendPixelUpdate(pixel);
-          count++;
-          
-          // Gib alle 100 Pixel ein Update
-          if (count % 100 === 0 || count === totalPixels) {
-            console.log(`${count}/${totalPixels} Logo-Pixel einzeln geladen (${Math.round(count/totalPixels*100)}%)`);
-          }
-        }
-        
-        setDebugMinting(prev => [...prev, `Logo mit ${totalPixels} Pixeln im Einzelmodus geladen`]);
-      }
-      
-      setIsTransactionInProgress(false);
-    }
-  };
   
   // Initialisiere Timer für die Epoche
   useEffect(() => {
@@ -639,7 +456,6 @@ export default function Game() {
                 <div>Connect your wallet</div>
               )}
               <div className={styles.statsInfo}>
-                Drawn pixels: {pixels?.length || 0}
                 {isConnected && <span className={styles.connectedBadge}>Live</span>}
               </div>
             </div>
@@ -655,25 +471,6 @@ export default function Game() {
                 disabled={connectionStatus !== 'connected' || isTransactionInProgress}
                 key={`canvas-${canvasClearedCount}`} // Key für Reset
               />
-              
-              {connectionStatus === 'connected' && (
-                <div className={styles.canvasControls}>
-                  <button 
-                    onClick={handleResetCanvas}
-                    className={styles.controlButton}
-                    disabled={isTransactionInProgress}
-                  >
-                    Canvas zurücksetzen
-                  </button>
-                  <button 
-                    onClick={handleLoadLogo}
-                    className={styles.controlButton}
-                    disabled={isTransactionInProgress}
-                  >
-                    Logo laden
-                  </button>
-                </div>
-              )}
             </div>
             
             {debugMinting.length > 0 && (
