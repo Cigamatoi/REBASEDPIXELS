@@ -1,0 +1,90 @@
+.countdownContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 15px;
+  background: rgba(0, 0, 0, 0.7);
+  border-radius: 10px;
+  border: 1px solid rgba(0, 140, 255, 0.5);
+  color: white;
+  box-shadow: 0 0 15px rgba(0, 140, 255, 0.5);
+  margin: 20px 0;
+  backdrop-filter: blur(5px);
+}
+
+.countdownTitle {
+  font-size: 1.2rem;
+  font-weight: 500;
+  margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #00ccff;
+}
+
+.countdownTimer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.timeUnit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0 5px;
+}
+
+.timeValue {
+  font-size: 2rem;
+  font-weight: 700;
+  background: linear-gradient(to bottom, #ffffff, #00aeff);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 3px rgba(0, 174, 255, 0.5);
+}
+
+.timeLabel {
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  margin-top: 5px;
+  letter-spacing: 1px;
+  color: #aaa;
+}
+
+.timeSeparator {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 0 5px;
+  color: #00ccff;
+  line-height: 1;
+  position: relative;
+  top: -10px;
+}
+
+/* Blinking animation for the last minute */
+@keyframes blinking {
+  0% { opacity: 1; }
+  50% { opacity: 0.5; }
+  100% { opacity: 1; }
+}
+
+.urgent .timeValue {
+  color: #ff3366;
+  animation: blinking 1s infinite;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+  .timeValue {
+    font-size: 1.5rem;
+  }
+  
+  .timeLabel {
+    font-size: 0.6rem;
+  }
+  
+  .timeSeparator {
+    font-size: 1.5rem;
+    top: -8px;
+  }
+} 

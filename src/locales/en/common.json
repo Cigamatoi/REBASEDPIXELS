@@ -1,0 +1,34 @@
+{
+  "subtitle": "CANVAS PAINTING GAME",
+  "welcome": "Welcome to REBASED PIXELS! Here you can create digital pixel art - either alone or together with other artists on the IOTA Blockchain.",
+  "selectMode": "Choose your game mode",
+  "startGame": "Start Game",
+  "comingSoon": "Coming Soon",
+  "back": "Back",
+  "disconnect": "Disconnect",
+  "selectColor": "Select color",
+  "connectWallet": "Connect your wallet",
+  "drawnPixels": "Drawn Pixels",
+  "live": "Live",
+  "confirmingTransaction": "Confirming pixel transaction...",
+  "canvasSize": "Choose canvas size",
+  "dragToResize": "Drag with your mouse to adjust the canvas size.",
+  "pixels": "pixels",
+  "pixelSize": "Pixel size",
+  "start": "Start",
+  "clearCanvas": "Clear canvas",
+  "modes": {
+    "multiplayer": {
+      "title": "Multiplayer Blockchain",
+      "description": "Draw together with others on a canvas. Each pixel is confirmed by a blockchain transaction. Your pixel remains stored on the blockchain forever."
+    },
+    "singleplayer": {
+      "title": "Singleplayer",
+      "description": "Draw freely without blockchain transactions. You can adjust the canvas size and place pixels without connecting a wallet."
+    },
+    "battle": {
+      "title": "Battle Mode",
+      "description": "Pixel battle against other players. Overpaint others' pixels and defend your territory. Coming soon!"
+    }
+  }
+} 

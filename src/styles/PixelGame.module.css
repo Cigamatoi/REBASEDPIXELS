@@ -30,8 +30,12 @@
 }
 
 .headerTitle {
-  font-size: 3rem;
-  text-align: center;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
 }
 
 .headerButtons {
@@ -92,6 +96,33 @@
   font-size: 14px;
   color: #ffffff;
   text-align: center;
+  position: relative;
+}
+
+.connectedBadge {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: #00cc44;
+  color: #000;
+  font-size: 12px;
+  padding: 2px 6px;
+  border-radius: 10px;
+  font-weight: bold;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 0.6;
+  }
+  50% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0.6;
+  }
 }
 
 .walletButton, .colorPicker {
@@ -218,4 +249,452 @@
   color: #555;
   position: relative;
   z-index: 10;
+}
+
+.backButton {
+  background-color: transparent;
+  border: 1px solid #666;
+  color: #fff;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  margin-right: 10px;
+  transition: all 0.3s ease;
+}
+
+.backButton:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  border-color: #999;
+}
+
+.gameInfo {
+  text-align: center;
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.gameInfo h2 {
+  margin-top: 0;
+  color: var(--primary-color);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-size: 24px;
+  margin-bottom: 5px;
+  text-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+}
+
+.gameInfo p {
+  margin-bottom: 0;
+  color: #ccc;
+}
+
+.setupContainer {
+  text-align: center;
+  padding: 20px;
+}
+
+.canvasSizeDemo {
+  border: 2px dashed #666;
+  margin: 20px auto;
+  background-color: #222;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100%;
+  transition: border-color 0.3s ease;
+}
+
+.canvasSizeDemo:hover {
+  border-color: #00ffcc;
+}
+
+.canvasSizeInfo {
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.pixelSizeInfo {
+  margin-top: 5px;
+  font-size: 0.8em;
+  color: #999;
+}
+
+.startButton {
+  background: linear-gradient(to right, #00ffcc, #33ccff);
+  color: #000;
+  border: none;
+  padding: 10px 30px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 30px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 20px;
+}
+
+.startButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 15px rgba(0, 255, 204, 0.3);
+}
+
+.controlsContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.2);
+  border-radius: 8px;
+}
+
+.clearButton {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 5px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.clearButton:hover {
+  background-color: #d32f2f;
+}
+
+.pixelCanvas {
+  display: block;
+  background-color: #000;
+  border: 1px solid #333;
+  max-width: 100%;
+  height: auto;
+}
+
+.languageSwitcherHeader {
+  margin-right: 12px;
+}
+
+.galleryButtonContainer {
+  margin: 30px auto;
+  text-align: center;
+  max-width: 400px;
+}
+
+.galleryButton {
+  background: linear-gradient(to right, #0080ff, #00b7ff);
+  color: white;
+  border: none;
+  padding: 12px 24px;
+  border-radius: 50px;
+  font-size: 1rem;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 140, 255, 0.3);
+  transition: all 0.3s ease;
+  display: block;
+  width: 100%;
+}
+
+.galleryButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(0, 140, 255, 0.4);
+  background: linear-gradient(to right, #0070e0, #00a0e0);
+}
+
+.galleryButton:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 8px rgba(0, 140, 255, 0.3);
+}
+
+.galleryInfo {
+  margin-top: 10px;
+  color: #888;
+  font-size: 0.9rem;
+}
+
+/* Screenshot-Button und Aktionen */
+.canvasActions {
+  display: flex;
+  justify-content: center;
+  margin-top: 15px;
+}
+
+.screenshotButton {
+  background: linear-gradient(90deg, #00ffcc, #00bbaa);
+  color: #000;
+  font-weight: 600;
+  border: none;
+  border-radius: 5px;
+  padding: 8px 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+}
+
+.screenshotButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+}
+
+.screenshotButton:disabled {
+  background: #666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Modal für Screenshot */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  backdrop-filter: blur(5px);
+}
+
+.modalContent {
+  background-color: #1a1a2a;
+  width: 80%;
+  max-width: 800px;
+  border-radius: 10px;
+  box-shadow: 0 0 30px rgba(0, 255, 204, 0.4);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+}
+
+.modalHeader {
+  background: linear-gradient(90deg, #00ffcc, #00bbaa);
+  padding: 15px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.modalHeader h3 {
+  color: #000;
+  margin: 0;
+  font-size: 1.2rem;
+}
+
+.closeButton {
+  background: none;
+  border: none;
+  color: #000;
+  font-size: 1.5rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  transition: background-color 0.3s;
+}
+
+.closeButton:hover {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+.modalBody {
+  padding: 20px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.screenshotImage {
+  max-width: 100%;
+  border: 2px solid #00ffcc;
+  box-shadow: 0 0 20px rgba(0, 255, 204, 0.2);
+  margin-bottom: 20px;
+  image-rendering: pixelated;
+}
+
+.modalActions {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+  width: 100%;
+  justify-content: center;
+}
+
+.downloadButton, .mintButton {
+  padding: 10px 20px;
+  border-radius: 5px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+
+.downloadButton {
+  background-color: #333;
+  color: #fff;
+  text-decoration: none;
+  border: 1px solid #555;
+}
+
+.downloadButton:hover {
+  background-color: #444;
+}
+
+.mintButton {
+  background: linear-gradient(90deg, #00ffcc, #00bbaa);
+  color: #000;
+  border: none;
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+}
+
+.mintButton:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(0, 255, 204, 0.5);
+}
+
+.mintButton:disabled {
+  background: #666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Epoch Timer Styles */
+.epochTimer {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 8px;
+  padding: 10px 15px;
+  margin: 15px auto 20px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  max-width: 200px;
+  border: 1px solid rgba(0, 255, 204, 0.3);
+}
+
+.epochTimerLabel {
+  font-size: 0.9rem;
+  color: #aaa;
+  margin-bottom: 5px;
+}
+
+.epochTimerValue {
+  font-size: 1.5rem;
+  font-weight: bold;
+  color: #00ffcc;
+  font-family: 'Orbitron', monospace;
+  text-shadow: 0 0 10px rgba(0, 255, 204, 0.5);
+}
+
+.epochContributors {
+  font-size: 0.8rem;
+  margin-top: 5px;
+  color: #aaa;
+  background-color: rgba(0, 0, 0, 0.2);
+  padding: 3px 8px;
+  border-radius: 4px;
+}
+
+.debugInfo {
+  margin-top: 20px;
+  background-color: rgba(0, 0, 0, 0.7);
+  border-radius: 8px;
+  padding: 10px 15px;
+  text-align: left;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.debugInfo h3 {
+  color: #00ffcc;
+  font-size: 1rem;
+  margin-top: 0;
+  margin-bottom: 10px;
+}
+
+.debugLog {
+  max-height: 200px;
+  overflow-y: auto;
+  font-family: monospace;
+  font-size: 0.8rem;
+  color: #ddd;
+  background-color: rgba(0, 0, 0, 0.4);
+  padding: 8px;
+  border-radius: 4px;
+}
+
+.debugLine {
+  margin-bottom: 4px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.manualMintButton {
+  margin-top: 10px;
+  background: linear-gradient(90deg, #00ffcc, #00bbaa);
+  color: #000;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.manualMintButton:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 10px rgba(0, 255, 204, 0.3);
+}
+
+.manualMintButton:disabled {
+  background: #666;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.canvasControls {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+  justify-content: center;
+}
+
+.controlButton {
+  background: linear-gradient(90deg, #282832, #1c1c24);
+  color: #00ffcc;
+  border: 1px solid #00ffcc;
+  border-radius: 4px;
+  padding: 6px 12px;
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.controlButton:hover {
+  background: #00ffcc;
+  color: #000;
+  transform: translateY(-1px);
+}
+
+.controlButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  background: #333;
+  color: #aaa;
+  border-color: #555;
+  transform: none;
 } 

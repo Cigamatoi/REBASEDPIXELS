@@ -1,20 +1,27 @@
 :root {
-  --background: #f7f7f8;
-  --foreground: #171717;
+  --primary-color: #00ffcc;
+  --primary-hover: #33ffdd;
+  --background-dark: #0f0f1a;
+  --background-light: #1a1a2e;
+  --text-color: #ffffff;
+  --text-secondary: #cccccc;
+  --accent-color: #33ccff;
+  --font-title: 'Orbitron', sans-serif;
+  --font-body: 'Exo 2', sans-serif;
 }
 
 html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
+  font-family: var(--font-body);
+  background: var(--background-dark);
+  color: var(--text-color);
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: 'Inter Variable', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+h1, h2, h3, h4, h5, h6, .title {
+  font-family: var(--font-title);
+  letter-spacing: 0.03em;
 }
 
 * {
@@ -26,6 +33,14 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+}
+
+button {
+  font-family: var(--font-body);
+}
+
+input {
+  font-family: var(--font-body);
 }
 
 @media (prefers-color-scheme: dark) {
