@@ -36,6 +36,7 @@ import { truncateAddress } from '~/helpers'
 import useSocket from '~/hooks/useSocket'
 import styles from '~/styles/PixelGame.module.css'
 import { createLocalBlobUrl, downloadImageFromUrl, saveImageToServer, uploadCanvasToIPFS } from '~/utils/ipfsUtils'
+import { calculateNextEpochEndTime, formatTimeRemaining, isEpochEnded } from '~/utils/epochUtils'
 
 // Importiere die PixelCanvas-Komponente Client-seitig ohne SSR
 const PixelCanvas = dynamic(() => import('~/components/PixelCanvas'), {
@@ -79,8 +80,13 @@ const Game: NextPage = () => {
   const [ipfsError, setIpfsError] = useState<string | null>(null)
   const [isPreviewVisible, setIsPreviewVisible] = useState(false)
 
+  // Neuer State für den Übergang zwischen Epochen
+  const [isEpochTransitionInProgress, setIsEpochTransitionInProgress] = useState(false)
+
   // Funktion zum Zurücksetzen des Canvas (alle Pixel löschen)
   const resetCanvas = useCallback(() => {
+    if (isEpochTransitionInProgress) return;
+
     // Hier Pixel-Daten zurücksetzen
     sendPixelUpdate({ reset: true })
 
@@ -93,62 +99,98 @@ const Game: NextPage = () => {
     // Log für das Debugging
     console.log('Canvas zurückgesetzt nach Epochenende')
     setDebugMinting((prev) => [...prev, 'Canvas wurde zurückgesetzt'])
-  }, [sendPixelUpdate])
+  }, [sendPixelUpdate, isEpochTransitionInProgress])
 
   // Initialisiere Timer für die Epoche
   useEffect(() => {
-    // Aktuelle Zeit + 3 Tage
-    const now = new Date()
-    // 3 Tage in Millisekunden
-    const threeDays = 3 * 24 * 60 * 60 * 1000
-    const nextEpochTime = new Date(now.getTime() + threeDays)
+    const fetchEpochData = async () => {
+      try {
+        const response = await fetch('/api/epoch-data');
+        const data = await response.json();
+        
+        if (data.epochEnd) {
+          const serverEpochEndTime = new Date(data.epochEnd).getTime();
+          setEpochEndTime(serverEpochEndTime);
+          console.log(`Server epoch end time: ${new Date(serverEpochEndTime).toLocaleString()}`);
+        } else {
+          // Fallback: Berechne lokales Epochenende
+          const now = new Date().getTime();
+          const nextEpochEndTime = calculateNextEpochEndTime(now);
+          setEpochEndTime(nextEpochEndTime);
+          console.log(`Local epoch end time: ${new Date(nextEpochEndTime).toLocaleString()}`);
+        }
+      } catch (error) {
+        console.error('Error fetching epoch data:', error);
+        // Fallback: Berechne lokales Epochenende
+        const now = new Date().getTime();
+        const nextEpochEndTime = calculateNextEpochEndTime(now);
+        setEpochEndTime(nextEpochEndTime);
+        console.log(`Local epoch end time (fallback): ${new Date(nextEpochEndTime).toLocaleString()}`);
+      }
+    };
 
-    const epochEndTimeMs = nextEpochTime.getTime()
-    setEpochEndTime(epochEndTimeMs)
-    console.log(`Next epoch end time set to: ${new Date(epochEndTimeMs).toLocaleTimeString()}`)
-  }, [])
+    fetchEpochData();
+  }, []);
 
-  // Separater Effekt für die Timer-Anzeige, aktualisiert jede Minute
+  // Separater Effekt für die Timer-Anzeige, aktualisiert jede Sekunde
   useEffect(() => {
-    if (epochEndTime <= 0) return
+    if (epochEndTime <= 0) return;
 
     const updateTimeRemaining = () => {
-      const currentTime = new Date().getTime()
-      const timeLeft = Math.max(0, epochEndTime - currentTime)
+      const currentTime = new Date().getTime();
+      const timeLeft = Math.max(0, epochEndTime - currentTime);
 
-      const days = Math.floor(timeLeft / (1000 * 60 * 60 * 24))
-      const hours = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
-      const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60))
+      // Formatiere die verbleibende Zeit
+      const formattedTime = formatTimeRemaining(timeLeft);
+      setTimeRemaining(formattedTime);
 
-      const formattedTime = `${days}d ${hours}h ${minutes}m`
-      setTimeRemaining(formattedTime)
-
-      // Wenn die Zeit abgelaufen ist (Epoch-Ende)
-      if (timeLeft === 0) {
-        console.log('Epoch ended, capturing canvas screenshot automatically')
+      // Wenn die Zeit abgelaufen ist (Epoch-Ende) und kein Übergang läuft
+      if (isEpochEnded(epochEndTime) && !isEpochTransitionInProgress) {
+        console.log('Epoch ended, starting transition');
+        setIsEpochTransitionInProgress(true);
 
         // Screenshots erstellen
-        captureCanvasScreenshot()
+        captureCanvasScreenshot().then(() => {
+          // Hole die neue Epochenzeit vom Server
+          fetch('/api/epoch-data')
+            .then(response => response.json())
+            .then(data => {
+              if (data.epochEnd) {
+                const newEpochEndTime = new Date(data.epochEnd).getTime();
+                setEpochEndTime(newEpochEndTime);
+                console.log(`New epoch end time from server: ${new Date(newEpochEndTime).toLocaleString()}`);
+              }
+            })
+            .catch(error => {
+              console.error('Error fetching new epoch data:', error);
+              // Fallback: Berechne lokales Epochenende
+              const newEpochEndTime = calculateNextEpochEndTime(currentTime);
+              setEpochEndTime(newEpochEndTime);
+              console.log(`New epoch end time (fallback): ${new Date(newEpochEndTime).toLocaleString()}`);
+            })
+            .finally(() => {
+              // Setze die Liste der Mitwirkenden zurück für die neue Epoche
+              setEpochContributors([]);
 
-        // Setze den Timer für die nächste Epoche (weitere 3 Tage)
-        const newEpochEndTime = new Date().getTime() + 3 * 24 * 60 * 60 * 1000
-        setEpochEndTime(newEpochEndTime)
-        console.log(`New epoch end time set to: ${new Date(newEpochEndTime).toLocaleTimeString()}`)
+              // Canvas zurücksetzen
+              resetCanvas();
 
-        // Setze die Liste der Mitwirkenden zurück für die neue Epoche
-        setEpochContributors([])
-
-        // Canvas zurücksetzen
-        resetCanvas()
+              // Übergang beendet
+              setIsEpochTransitionInProgress(false);
+            });
+        }).catch(error => {
+          console.error('Error during epoch transition:', error);
+          setIsEpochTransitionInProgress(false);
+        });
       }
-    }
+    };
 
-    // Aktualisiere sofort und dann jede Minute
-    updateTimeRemaining()
-    const interval = setInterval(updateTimeRemaining, 60 * 1000) // Jede Minute aktualisieren
+    // Aktualisiere sofort und dann jede Sekunde
+    updateTimeRemaining();
+    const interval = setInterval(updateTimeRemaining, 1000);
 
-    return () => clearInterval(interval)
-  }, [epochEndTime, resetCanvas])
+    return () => clearInterval(interval);
+  }, [epochEndTime, resetCanvas, isEpochTransitionInProgress]);
 
   // Farbauswahl Änderung
   const handleColorChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -569,6 +611,116 @@ const Game: NextPage = () => {
     return null
   }, [])
 
+  // Handler für Test-Screenshot
+  const handleTestScreenshot = async () => {
+    try {
+      setIsEpochTransitionInProgress(true);
+      await captureCanvasScreenshot();
+      console.log('Test screenshot created successfully');
+    } catch (error) {
+      console.error('Error creating test screenshot:', error);
+    } finally {
+      setIsEpochTransitionInProgress(false);
+    }
+  };
+
+  // Handler für das Ende der Epoche
+  const handleEndEpoch = async () => {
+    if (isEpochTransitionInProgress) return
+
+    setIsEpochTransitionInProgress(true)
+    try {
+      // Erstelle Screenshot
+      await createScreenshot()
+
+      // Berechne nächste Epochenzeit
+      const now = new Date().getTime()
+      const nextEpochEnd = calculateNextEpochEndTime(now)
+      setEpochEndTime(nextEpochEnd)
+
+      // Setze Contributors zurück
+      setEpochContributors([])
+
+      // Setze Canvas zurück
+      resetCanvas()
+    } catch (error) {
+      console.error('Fehler beim Beenden der Epoche:', error)
+    } finally {
+      setIsEpochTransitionInProgress(false)
+    }
+  }
+
+  // Funktion zum Erstellen eines Screenshots
+  const createScreenshot = async () => {
+    try {
+      // Lade Pixel-Daten vom Server
+      const response = await fetch('/api/get-pixels')
+      if (!response.ok) {
+        throw new Error('Fehler beim Laden der Pixel-Daten')
+      }
+      const { pixels } = await response.json()
+
+      // Erstelle temporäres Canvas
+      const tempCanvas = document.createElement('canvas')
+      tempCanvas.width = 1000
+      tempCanvas.height = 1000
+      const ctx = tempCanvas.getContext('2d')
+      if (!ctx) {
+        throw new Error('Konnte Canvas-Kontext nicht erstellen')
+      }
+
+      // Zeichne Hintergrund
+      ctx.fillStyle = '#000000'
+      ctx.fillRect(0, 0, 1000, 1000)
+
+      // Zeichne Raster
+      for (let x = 0; x < 1000; x += 10) {
+        for (let y = 0; y < 1000; y += 10) {
+          ctx.fillStyle = '#111111'
+          ctx.fillRect(x, y, 8, 8)
+        }
+      }
+
+      // Zeichne alle Pixel
+      pixels.forEach((pixel: { x: number; y: number; color: string }) => {
+        ctx.fillStyle = pixel.color
+        ctx.fillRect(pixel.x, pixel.y, 8, 8)
+      })
+
+      // Konvertiere zu Data URL
+      const dataUrl = tempCanvas.toDataURL('image/png')
+
+      // Speichere das Bild lokal
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-')
+      const filename = `Screenshot-Epoch-${timestamp}`
+      await saveImageToServer(dataUrl, filename)
+
+      // Lade zu IPFS hoch
+      const ipfsResponse = await fetch('/api/upload-to-ipfs', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ imageData: dataUrl }),
+      })
+
+      if (!ipfsResponse.ok) {
+        const errorData = await ipfsResponse.json()
+        console.error('IPFS Upload Fehler:', errorData)
+        throw new Error(`Fehler beim Hochladen zu IPFS: ${errorData.details || errorData.error || 'Unbekannter Fehler'}`)
+      }
+
+      const { ipfsUrl, ipfsHash } = await ipfsResponse.json()
+      console.log('Screenshot erfolgreich zu IPFS hochgeladen:', ipfsUrl)
+
+      // Hier können wir später die NFT-Erstellung hinzufügen
+      // TODO: NFT mit ipfsHash erstellen
+
+    } catch (error) {
+      console.error('Fehler beim Erstellen des Screenshots:', error)
+    }
+  }
+
   // Normale Ansicht für lokale Entwicklung
   return (
     <div className={styles.container}>
@@ -656,6 +808,24 @@ const Game: NextPage = () => {
       <div className={styles.galleryButtonContainer}>
         <button className={styles.galleryButton} onClick={() => router.push('/gallery')}>
           Gallery
+        </button>
+      </div>
+
+      {/* Füge die neuen Buttons hinzu */}
+      <div className={styles.debugControls}>
+        <button 
+          onClick={handleTestScreenshot}
+          disabled={isEpochTransitionInProgress}
+          className={styles.debugButton}
+        >
+          Test Screenshot
+        </button>
+        <button 
+          onClick={handleEndEpoch}
+          disabled={isEpochTransitionInProgress}
+          className={styles.debugButton}
+        >
+          End Epoch
         </button>
       </div>
     </div>
